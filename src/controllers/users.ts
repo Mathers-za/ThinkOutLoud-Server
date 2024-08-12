@@ -1,21 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import Users, { iUsersModel } from "../models/Users";
 import Logging from "../library/Logging";
-
-export const createUser = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const newUSer = await Users.create(req.body);
-    Logging.log(newUSer);
-    res.status(201).json(newUSer);
-  } catch (error: any) {
-    res.status(500).json({ error });
-    Logging.error(error._message);
-  }
-};
+import passport from "passport";
+import { isValidPassword } from "../utils/registrationAndLoginHelperfns";
 
 export const getUserById = async (
   req: Request,
@@ -69,4 +56,82 @@ export const updateUser = async (
     res.status(500).json({ error });
     Logging.error(error.message);
   }
+};
+
+export const registerUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const errorMessage = isValidPassword(
+      req.body.password,
+      req.body.passwordConfirm
+    );
+
+    if (errorMessage) {
+      return res.status(400).json({ message: errorMessage });
+    }
+    Users.register(
+      new Users(req.body),
+      req.body.password,
+      function (error, user) {
+        if (error) {
+          Logging.error(error);
+          return res.status(400).json({
+            success: false,
+            message:
+              error.name === "MissingUsernameError"
+                ? "Email address is required"
+                : error.name === "UserExistsError"
+                ? "Email adrress already exists.Please use a diffrent one"
+                : error.message,
+          });
+        }
+
+        res.status(201).json({
+          message: "Account created and logged in successfully",
+          success: true,
+        });
+      }
+    );
+  } catch (error: any) {
+    return res.status(500).json({
+      message: "Internal server error " + error.message,
+    });
+  }
+};
+
+export const loginUser = (req: Request, res: Response, next: NextFunction) => {
+  if (!req.body.email || !req.body.password) {
+    return res.status(400).json({ message: "Email or password is missing" });
+  }
+
+  // Passport authenticate middleware
+  passport.authenticate("local", (error: any, user: any, info: any) => {
+    if (error) {
+      return res
+        .status(500)
+        .json({ message: "Internal server error", error: error.message });
+    }
+
+    if (!user) {
+      return res
+        .status(401)
+        .json({ message: "Email or password is incorrect" });
+    }
+
+    req.logIn(user, (err) => {
+      if (err) {
+        return res
+          .status(500)
+          .json({ message: "Internal server error", error: err.message });
+      }
+
+      return res.status(200).json({
+        message: "Successfully logged in",
+        userId: user._id,
+      });
+    });
+  })(req, res, next);
 };

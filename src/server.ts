@@ -3,6 +3,11 @@ import express from "express";
 import mongoose from "mongoose";
 import Logging from "./library/Logging";
 import usersRoutes from "./routes/users";
+import session from "express-session";
+import passport from "passport";
+import Users from "./models/Users";
+import { Strategy as LocalStrategy } from "passport-local";
+import "./config/passport";
 
 const app = express();
 
@@ -30,6 +35,15 @@ function startServer() {
 
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
+  app.use(
+    session({
+      secret: process.env.SESSION_SECRET!,
+      saveUninitialized: false,
+      resave: false,
+    })
+  );
+  app.use(passport.initialize());
+  app.use(passport.session());
 
   app.use("/healthCheck", (req, res) => {
     res.status(200).json({ message: "Server working properly" });
