@@ -2,13 +2,7 @@ import mongoose, { Document, Schema } from "mongoose";
 import regexPatterns from "../utils/regex";
 import passportLocalMongoose from "passport-local-mongoose";
 
-export interface iUsers {
-  firstName: string;
-  lastName: string;
-  email: string;
-}
-
-export interface iUsersModel extends iUsers, Document {}
+export interface iUsersModel extends Document {}
 
 const UsersSchema = new mongoose.Schema(
   {
@@ -23,9 +17,25 @@ const UsersSchema = new mongoose.Schema(
 
     email: {
       type: String,
-      lowerCase: true,
+      lowercase: true,
       required: true,
       match: [regexPatterns.email, "Please provide a valid email address"],
+    },
+    friends: [{ type: Schema.Types.ObjectId, ref: "User" }],
+
+    additionalInfo: {
+      age: {
+        type: Number,
+        min: [1, "Your age cannot be less than 1 "],
+        max: [200, "Older than 200! Keep dreaming"],
+      },
+      hobbies: [String],
+      dateOfBirth: { type: Date },
+      relationshipStatus: {
+        type: String,
+        enum: ["Single", "Married", "In a relationship", "Forever-alone"],
+      },
+      countriesVisited: [String],
     },
   },
   { timestamps: true }
