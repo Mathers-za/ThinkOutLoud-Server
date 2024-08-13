@@ -1,10 +1,12 @@
 import mongoose, { Document, Schema } from "mongoose";
 import regexPatterns from "../utils/regex";
 import passportLocalMongoose from "passport-local-mongoose";
+import {
+  iUsersModel,
+  iUsersSchema,
+} from "../interfaces/schema and model/iUsersModel";
 
-export interface iUsersModel extends Document {}
-
-const UsersSchema = new mongoose.Schema(
+const UsersSchema: Schema = new mongoose.Schema<iUsersSchema>(
   {
     firstName: {
       type: String,

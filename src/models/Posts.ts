@@ -1,8 +1,11 @@
 import mongoose, { Schema, Document } from "mongoose";
-export interface iPostsModel extends Document {}
-const PostsSchema = new Schema(
+import {
+  iPostsModel,
+  iPostsSchema,
+} from "../interfaces/schema and model/iPostsModel";
+const PostsSchema: Schema = new Schema<iPostsSchema>(
   {
-    userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    creatorId: { type: Schema.Types.ObjectId, ref: "User", required: true },
 
     content: {
       type: String,
@@ -15,8 +18,13 @@ const PostsSchema = new Schema(
         content: {
           type: String,
           minlength: [1, "You cannot post an empty comment"],
+          required: true,
         },
-        userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+        commentatorId: {
+          type: Schema.Types.ObjectId,
+          ref: "User",
+          required: true,
+        },
         createdAt: {
           type: Date,
           default: Date.now,

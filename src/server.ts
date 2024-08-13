@@ -1,13 +1,13 @@
 import { config } from "./config/config";
-import express from "express";
+import express, { Response, Request } from "express";
 import mongoose from "mongoose";
 import Logging from "./library/Logging";
 import usersRoutes from "./routes/users";
 import session from "express-session";
 import passport from "passport";
-import Users from "./models/Users";
-import { Strategy as LocalStrategy } from "passport-local";
+import postsRoutes from "./routes/posts";
 import "./config/passport";
+import { iCustomError } from "./library/CustomError";
 
 const app = express();
 
@@ -50,11 +50,19 @@ function startServer() {
   });
 
   app.use(`/users`, usersRoutes);
+  app.use("/posts", postsRoutes);
 
   app.use((req, res, next) => {
     const error = new Error("endpoint not found");
     Logging.error(error.message);
     res.status(404).json({ message: error.message });
+  });
+
+  app.use((err: iCustomError, req: Request, res: Response) => {
+    Logging.error(err.message);
+    return res
+      .status(err.status)
+      .json({ message: err.message, error: err.stack });
   });
 
   app.listen(config.server.port, () =>

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import Users, { iUsersModel } from "../models/Users";
+import Users from "../models/Users";
 import Logging from "../library/Logging";
 import passport from "passport";
 import { isValidPassword } from "../utils/registrationAndLoginHelperfns";
@@ -36,7 +36,7 @@ export const getAllUsers = async (
     Logging.error(error.message);
   }
 };
-
+//TODO fighure out a flexible solution to handle updates in a way t6that accomodates embedded arays/embedded docs etc
 export const updateUser = async (
   req: Request,
   res: Response,
