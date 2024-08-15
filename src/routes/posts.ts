@@ -1,20 +1,33 @@
 import express from "express";
 import * as controller from "../controllers/posts";
-import { isRequestParamsProvided } from "../middleware/validationMiddleware";
+import {
+  checkQueryParamsCorrect,
+  isRequestParamsProvided,
+} from "../middleware/validationMiddleware";
 
 const router = express.Router();
 
-router.post("/create", controller.createPost);
+router.post("/createPost", controller.createPost);
 router.get(
   "/getPost:postId",
   isRequestParamsProvided("postId"),
   controller.getPost
 );
 router.patch(
-  "/update:postId",
+  "/updatePost:postId",
   isRequestParamsProvided("postId"),
   controller.updatePost
 );
-router.delete("/delete", controller.deletePost);
+router.delete(
+  "/deletePost",
+  checkQueryParamsCorrect(["postId", "userId"]),
+  controller.deletePost
+);
+
+router.get(
+  "/getAllFriendsPosts:userId",
+  isRequestParamsProvided("userId"),
+  controller.getAllFriendsPosts
+);
 
 export default router;

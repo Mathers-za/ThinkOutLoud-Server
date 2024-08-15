@@ -3,15 +3,20 @@ import Users from "../models/Users";
 import Logging from "../library/Logging";
 import passport from "passport";
 import { isValidPassword } from "../utils/registrationAndLoginHelperfns";
+import "express-session";
+import {
+  iUsersModel,
+  iUsersSchema,
+} from "../interfaces/schema and model/iUsersModel";
+import { Schema } from "mongoose";
 
-export const getUserById = async (
+export const getUser = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const userID = req.params.userId;
-    const userData = await Users.findById(userID);
+    const userData = await Users.findById((req.user as iUsersModel).id);
     userData
       ? res.status(200).json(userData)
       : res.status(404).json({ message: "Data not found" });
@@ -43,13 +48,12 @@ export const updateUser = async (
   next: NextFunction
 ) => {
   const userId = req.params.userId;
-
   try {
     const userData = await Users.findByIdAndUpdate(userId, req.body, {
       new: true,
       runValidators: true,
     });
-    userData
+    userData //TODO so db fails silently ie. if u post an update and the udpate doenst actually occur the method used above will simply return back the "new" doc any even tho it actually failed. You need to fighure this problem out hopefully wihtout have to run 2 queries
       ? res.status(201).json(userData)
       : res.status(404).json({ message: "User not found" });
   } catch (error: any) {
@@ -131,6 +135,7 @@ export const loginUser = (req: Request, res: Response, next: NextFunction) => {
       return res.status(200).json({
         message: "Successfully logged in",
         userId: user._id,
+        requestId: req.sessionID,
       });
     });
   })(req, res, next);

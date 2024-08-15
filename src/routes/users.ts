@@ -1,12 +1,17 @@
 import * as controller from "../controllers/users";
-import express, { Router } from "express";
+import express from "express";
+import { isRequestParamsProvided } from "../middleware/validationMiddleware";
 
 const router = express.Router();
 
 router.post(`/register`, controller.registerUser);
-router.get("/getUser:userId", controller.getUserById);
+router.get("/getUser", controller.getUser);
 router.get("/getAllUsers", controller.getAllUsers);
-router.patch("/update:userId", controller.updateUser);
+router.patch(
+  "/update:userId",
+  isRequestParamsProvided("userId"),
+  controller.updateUser
+);
 router.post("/login", controller.loginUser);
 
 export default router;

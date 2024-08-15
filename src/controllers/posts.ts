@@ -47,22 +47,13 @@ export const updatePost = async (
   }
 };
 
-interface DeletePostParams {
-  postId: string;
-  userId: string;
-}
-
 export const deletePost = async (
-  req: Request<DeletePostParams>,
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {
   const { postId, userId } = req.query;
-  if (!postId || !userId) {
-    return res
-      .status(400)
-      .json({ message: "Insuffcient params were supplied" });
-  }
+
   try {
     const post = await PostsModel.findById(postId);
     if (!post) {
@@ -95,5 +86,27 @@ export const getPost = async (
   } catch (error) {
     res.status(500).json({ message: "Internal server error", error: error });
     Logging.error(error);
+  }
+};
+
+export const getAllFriendsPosts = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const userId = req.params.userId;
+
+  try {
+    const userFriendsIdArray = await Users.findById(userId, { friends: 1 });
+    if (userFriendsIdArray) {
+      const postsArray = await Posts.find({
+        creatorId: { $in: userFriendsIdArray },
+      });
+
+      res.status(200).json(postsArray);
+    } else res.status(200).json([]);
+  } catch (error) {
+    Logging.error(error);
+    res.status(500).json({ message: "Internal server error", error: error });
   }
 };
