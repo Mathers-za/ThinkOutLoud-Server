@@ -15,22 +15,7 @@ const PostsSchema: Schema = new Schema<iPostsSchema>(
     likes: [{ type: Schema.Types.ObjectId, ref: "User" }],
     comments: [
       {
-        content: {
-          type: String,
-          minlength: [1, "You cannot post an empty comment"],
-          required: true,
-        },
-        commentatorId: {
-          type: Schema.Types.ObjectId,
-          ref: "User",
-          required: true,
-        },
-        createdAt: {
-          type: Date,
-          default: Date.now,
-          immutable: true,
-        },
-        updatedAt: { type: Date, default: Date.now },
+        type: Schema.ObjectId,
       },
     ],
   },

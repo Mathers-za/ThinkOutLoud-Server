@@ -40,9 +40,12 @@ const UsersSchema: Schema = new mongoose.Schema<iUsersSchema>(
       countriesVisited: [String],
     },
   },
+
   { timestamps: true }
 );
 
-UsersSchema.plugin(passportLocalMongoose, { usernameField: "email" });
+UsersSchema.plugin(passportLocalMongoose, {
+  usernameField: "-additionalInfo -email -hash -salt -",
+});
 
 export default mongoose.model<iUsersModel>("User", UsersSchema);

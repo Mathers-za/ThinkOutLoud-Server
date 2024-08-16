@@ -1,5 +1,6 @@
 import express from "express";
 import * as controller from "../controllers/posts";
+import * as postAggregationsAndHelpers from "../utils/postAggregationsAndHelpers";
 import {
   checkQueryParamsCorrect,
   isRequestParamsProvided,
@@ -27,7 +28,12 @@ router.delete(
 router.get(
   "/getAllFriendsPosts:userId",
   isRequestParamsProvided("userId"),
-  controller.getAllFriendsPosts
+  checkQueryParamsCorrect(["page,pageSize"])
+);
+router.get(
+  "/getUserPosts:userId",
+  isRequestParamsProvided("userId"),
+  checkQueryParamsCorrect(["page,pageSize"])
 );
 
 export default router;

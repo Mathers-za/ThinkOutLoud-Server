@@ -1,12 +1,24 @@
 import * as controller from "../controllers/users";
 import express from "express";
-import { isRequestParamsProvided } from "../middleware/validationMiddleware";
+import {
+  checkQueryParamsCorrect,
+  isRequestParamsProvided,
+} from "../middleware/validationMiddleware";
 
 const router = express.Router();
 
 router.post(`/register`, controller.registerUser);
-router.get("/getUser", controller.getUser);
-router.get("/getAllUsers", controller.getAllUsers);
+router.get("/getUserOnlogin", controller.intialGetUserAfterLogin);
+router.get(
+  "/usersSearch",
+  checkQueryParamsCorrect(["firstName", "lastName"]),
+  controller.serverSideUsersSearch
+);
+router.get(
+  "/getUser:userId",
+  isRequestParamsProvided("userId"),
+  controller.inspectUserDetails
+);
 router.patch(
   "/update:userId",
   isRequestParamsProvided("userId"),

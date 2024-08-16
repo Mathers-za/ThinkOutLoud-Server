@@ -10,7 +10,7 @@ import {
 } from "../interfaces/schema and model/iUsersModel";
 import { Schema } from "mongoose";
 
-export const getUser = async (
+export const intialGetUserAfterLogin = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -26,22 +26,49 @@ export const getUser = async (
   }
 };
 
-export const getAllUsers = async (
+export const inspectUserDetails = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
+  const userId = req.params.userId;
+
   try {
-    const allUsers = await Users.find({}).limit(10); //for now
-    allUsers
-      ? res.status(200).json(allUsers)
-      : res.status(200).json({ message: "No users exist" });
+    const userData = await Users.findById(userId, { hash: 0, salt: 0, __v: 0 });
+  } catch (error: any) {
+    Logging.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
+export const serverSideUsersSearch = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { firstName, lastName } = req.query as {
+    firstName: string;
+    lastName: string;
+  };
+
+  try {
+    const allUsers = await Users.find({
+      $or: [
+        { firstName: { $regex: firstName, $options: "i" } },
+        { lastName: { $regex: lastName, $options: "i" } },
+      ],
+    }).limit(10); //for now
+    res.status(200).json(allUsers);
   } catch (error: any) {
     res.status(500).json({ error });
     Logging.error(error.message);
   }
 };
-//TODO fighure out a flexible solution to handle updates in a way t6that accomodates embedded arays/embedded docs etc
+
 export const updateUser = async (
   req: Request,
   res: Response,
@@ -49,13 +76,14 @@ export const updateUser = async (
 ) => {
   const userId = req.params.userId;
   try {
-    const userData = await Users.findByIdAndUpdate(userId, req.body, {
-      new: true,
+    const metaData = await Users.updateOne({ _id: userId }, req.body, {
       runValidators: true,
     });
-    userData //TODO so db fails silently ie. if u post an update and the udpate doenst actually occur the method used above will simply return back the "new" doc any even tho it actually failed. You need to fighure this problem out hopefully wihtout have to run 2 queries
-      ? res.status(201).json(userData)
-      : res.status(404).json({ message: "User not found" });
+    if (metaData.matchedCount == 0) {
+      res.status(404).json({ success: false, message: "User not found" });
+    } else if (metaData.upsertedCount > 0) {
+      res.status(201).json({ success: true, message: "Update was successful" });
+    }
   } catch (error: any) {
     res.status(500).json({ error });
     Logging.error(error.message);

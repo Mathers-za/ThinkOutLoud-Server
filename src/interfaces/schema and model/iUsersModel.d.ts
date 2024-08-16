@@ -12,6 +12,8 @@ export interface iUsersSchema {
     relationshipStatus?: string[];
     countriesVisited?: string[];
   };
+  hash: String;
+  salt: string;
 }
 
 export interface iUsersModel extends iUsersSchema, Document {}
