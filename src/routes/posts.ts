@@ -5,6 +5,10 @@ import {
   checkQueryParamsCorrect,
   isRequestParamsProvided,
 } from "../middleware/validationMiddleware";
+import { handleAuthorisationToUpdateOrDelete } from "../utils/generalHelpers";
+import UserModel from "../models/Users";
+import { iUsersModel } from "../customTypings/interfaces/schema and model/iUsersModel";
+import PostModel from "../models/Posts";
 
 const router = express.Router();
 
@@ -17,11 +21,13 @@ router.get(
 router.patch(
   "/updatePost:postId",
   isRequestParamsProvided("postId"),
+  handleAuthorisationToUpdateOrDelete(UserModel, "postId", "creatorId"),
   controller.updatePost
 );
 router.delete(
   "/deletePost",
-  checkQueryParamsCorrect(["postId", "userId"]),
+  isRequestParamsProvided("postId"),
+  handleAuthorisationToUpdateOrDelete(PostModel, "postId", "creatorId"),
   controller.deletePost
 );
 

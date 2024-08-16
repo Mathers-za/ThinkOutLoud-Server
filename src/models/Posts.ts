@@ -2,7 +2,7 @@ import mongoose, { Schema, Document } from "mongoose";
 import {
   iPostsModel,
   iPostsSchema,
-} from "../interfaces/schema and model/iPostsModel";
+} from "../customTypings/interfaces/schema and model/iPostsModel";
 const PostsSchema: Schema = new Schema<iPostsSchema>(
   {
     creatorId: { type: Schema.Types.ObjectId, ref: "User", required: true },

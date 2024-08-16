@@ -21,7 +21,7 @@ router.get(
 );
 router.patch(
   "/update:userId",
-  isRequestParamsProvided("userId"),
+
   controller.updateUser
 );
 router.post("/login", controller.loginUser);

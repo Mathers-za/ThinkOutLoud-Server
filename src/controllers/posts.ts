@@ -6,7 +6,6 @@ import UsersModel from "../models/Users";
 import { Request, Response, NextFunction, Errback } from "express";
 
 import { getAllUsersPosts } from "../utils/postAggregationsAndHelpers";
-import { error } from "console";
 
 export const createPost = async (
   req: Request,
@@ -32,14 +31,14 @@ export const updatePost = async (
 ) => {
   const postId = req.params.postId;
   try {
-    const updatedPost = await PostsModel.findByIdAndUpdate(postId, req.body, {
+    const result = await PostsModel.updateOne({ _id: postId }, req.body, {
       runValidators: true,
-      new: true,
     });
-    Logging.warn(updatedPost);
-    updatedPost
-      ? res.status(201).json(updatedPost)
-      : res.status(404).json({ message: "Document not found" });
+    if (result.modifiedCount > 0) {
+      res.status(201).json({ message: "Successfully updated post" });
+    } else {
+      throw new Error("Post failed to update");
+    }
   } catch (error: unknown) {
     res.status(500).json({
       message: "Internal server error",
@@ -54,17 +53,14 @@ export const deletePost = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { postId, userId } = req.query;
+  const postId = req.params.postId;
 
   try {
-    const post = await PostsModel.findById(postId);
-    if (!post) {
-      return res.status(404).json({ message: "Post not found" });
-    } else if (userId !== post.creatorId.toString()) {
-      return res.status(401).json({ message: "Unauthorised" });
+    const result = await PostsModel.deleteOne({ _id: postId });
+    if (result.deletedCount! > 0) {
+      throw new Error("Failed to delete post");
     } else {
-      await PostsModel.deleteOne({ _id: post._id });
-      res.status(200).json({ message: "Deletion successfull" });
+      res.status(204).end();
     }
   } catch (error: any) {
     Logging.error(error);

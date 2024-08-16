@@ -4,7 +4,7 @@ import passportLocalMongoose from "passport-local-mongoose";
 import {
   iUsersModel,
   iUsersSchema,
-} from "../interfaces/schema and model/iUsersModel";
+} from "../customTypings/interfaces/schema and model/iUsersModel";
 
 const UsersSchema: Schema = new mongoose.Schema<iUsersSchema>(
   {

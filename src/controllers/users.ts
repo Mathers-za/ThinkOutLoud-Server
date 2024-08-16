@@ -7,7 +7,7 @@ import "express-session";
 import {
   iUsersModel,
   iUsersSchema,
-} from "../interfaces/schema and model/iUsersModel";
+} from "../customTypings/interfaces/schema and model/iUsersModel";
 import { Schema } from "mongoose";
 
 export const intialGetUserAfterLogin = async (
@@ -74,7 +74,8 @@ export const updateUser = async (
   res: Response,
   next: NextFunction
 ) => {
-  const userId = req.params.userId;
+  const userId = (req.user as iUsersSchema).id;
+
   try {
     const metaData = await Users.updateOne({ _id: userId }, req.body, {
       runValidators: true,
