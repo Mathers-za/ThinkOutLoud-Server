@@ -45,7 +45,7 @@ const UsersSchema: Schema = new mongoose.Schema<iUsersSchema>(
 );
 
 UsersSchema.plugin(passportLocalMongoose, {
-  usernameField: "-additionalInfo -email -hash -salt -",
+  usernameField: "email",
 });
 
 export default mongoose.model<iUsersModel>("User", UsersSchema);

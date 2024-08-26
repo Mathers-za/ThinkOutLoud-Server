@@ -7,19 +7,21 @@ import session from "express-session";
 import passport from "passport";
 import postsRoutes from "./routes/posts";
 import "./config/passport";
-
+import cors from "cors";
 const app = express();
 
 mongoose
   .connect(config.mongo.url)
   .then(() => {
     Logging.info("Connected to DB");
+
     startServer();
   })
 
   .catch((error) => Logging.error("Connection to db failed, error: " + error));
 
 function startServer() {
+  app.use(cors({ credentials: true, origin: "http://localhost:4200" }));
   app.use((req, res, next) => {
     Logging.info(
       `Incoming Request -> Method:[${req.method}] - Url: [${req.url}] - IP: [${req.ip}] `

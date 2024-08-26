@@ -11,9 +11,10 @@ router.post(`/register`, controller.registerUser);
 router.get("/getUserOnlogin", controller.intialGetUserAfterLogin);
 router.get(
   "/usersSearch",
-  checkQueryParamsCorrect(["firstName", "lastName"]),
+  checkQueryParamsCorrect(["searchString"]),
   controller.serverSideUsersSearch
 );
+
 router.get(
   "/getUser:userId",
   isRequestParamsProvided("userId"),
@@ -21,7 +22,7 @@ router.get(
 );
 router.patch(
   "/update:userId",
-
+  isRequestParamsProvided("userId"),
   controller.updateUser
 );
 router.post("/login", controller.loginUser);

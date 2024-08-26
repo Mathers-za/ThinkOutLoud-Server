@@ -50,16 +50,12 @@ export const serverSideUsersSearch = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { firstName, lastName } = req.query as {
-    firstName: string;
-    lastName: string;
-  };
-
+  const searchString = req.query.searchString;
   try {
     const allUsers = await Users.find({
       $or: [
-        { firstName: { $regex: firstName, $options: "i" } },
-        { lastName: { $regex: lastName, $options: "i" } },
+        { firstName: { $regex: searchString, $options: "i" } },
+        { lastName: { $regex: searchString, $options: "i" } },
       ],
     }).limit(10); //for now
     res.status(200).json(allUsers);
@@ -77,13 +73,16 @@ export const updateUser = async (
   const userId = (req.user as iUsersSchema).id;
 
   try {
-    const metaData = await Users.updateOne({ _id: userId }, req.body, {
+    const updateWriteResult = await Users.updateOne({ _id: userId }, req.body, {
       runValidators: true,
     });
-    if (metaData.matchedCount == 0) {
-      res.status(404).json({ success: false, message: "User not found" });
-    } else if (metaData.upsertedCount > 0) {
-      res.status(201).json({ success: true, message: "Update was successful" });
+    if (updateWriteResult.modifiedCount > 0) {
+      res.status(204).end();
+    } else {
+      res.status(400).json({
+        message:
+          "Failed to update resourse. You probably didnt structure the patch object correctly.",
+      });
     }
   } catch (error: any) {
     res.status(500).json({ error });
@@ -97,6 +96,7 @@ export const registerUser = async (
   next: NextFunction
 ) => {
   try {
+    console.log(req.body);
     const errorMessage = isValidPassword(
       req.body.password,
       req.body.passwordConfirm
@@ -140,7 +140,6 @@ export const loginUser = (req: Request, res: Response, next: NextFunction) => {
     return res.status(400).json({ message: "Email or password is missing" });
   }
 
-  // Passport authenticate middleware
   passport.authenticate("local", (error: any, user: any, info: any) => {
     if (error) {
       return res
