@@ -34,7 +34,7 @@ export const inspectUserDetails = async (
   const userId = req.params.userId;
 
   try {
-    const userData = await Users.findById(userId, { hash: 0, salt: 0, __v: 0 });
+    await Users.findById(userId, { hash: 0, salt: 0, __v: 0 });
   } catch (error: any) {
     Logging.error(error);
     res.status(500).json({
@@ -50,7 +50,10 @@ export const serverSideUsersSearch = async (
   res: Response,
   next: NextFunction
 ) => {
-  const searchString = req.query.searchString;
+  let searchString = req.query.searchString;
+  if (typeof searchString === "string") {
+    searchString = searchString.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+  }
   try {
     const allUsers = await Users.find({
       $or: [
@@ -71,12 +74,13 @@ export const updateUser = async (
   next: NextFunction
 ) => {
   const userId = (req.user as iUsersSchema).id;
-
+  Logging.warn(req.body);
   try {
     const updateWriteResult = await Users.updateOne({ _id: userId }, req.body, {
       runValidators: true,
     });
     if (updateWriteResult.modifiedCount > 0) {
+      console.log(updateWriteResult.modifiedCount);
       res.status(204).end();
     } else {
       res.status(400).json({

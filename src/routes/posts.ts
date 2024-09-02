@@ -1,14 +1,14 @@
 import express from "express";
 import * as controller from "../controllers/posts";
-import * as postAggregationsAndHelpers from "../utils/postAggregationsAndHelpers";
+
 import {
   checkQueryParamsCorrect,
   isRequestParamsProvided,
 } from "../middleware/validationMiddleware";
 import { handleAuthorisationToUpdateOrDelete } from "../utils/generalHelpers";
-import UserModel from "../models/Users";
-import { iUsersModel } from "../customTypings/interfaces/schema and model/iUsersModel";
+
 import PostModel from "../models/Posts";
+import { iPostsModel } from "../customTypings/interfaces/schema and model/iPostsModel";
 
 const router = express.Router();
 
@@ -21,25 +21,34 @@ router.get(
 router.patch(
   "/updatePost:postId",
   isRequestParamsProvided("postId"),
-  handleAuthorisationToUpdateOrDelete(UserModel, "postId", "creatorId"),
+  handleAuthorisationToUpdateOrDelete<iPostsModel>(
+    PostModel,
+    "postId",
+    "creatorId"
+  ),
   controller.updatePost
 );
 router.delete(
-  "/deletePost",
+  "/deletePost:postId",
   isRequestParamsProvided("postId"),
-  handleAuthorisationToUpdateOrDelete(PostModel, "postId", "creatorId"),
+  handleAuthorisationToUpdateOrDelete<iPostsModel>(
+    PostModel,
+    "postId",
+    "creatorId"
+  ),
   controller.deletePost
 );
 
 router.get(
-  "/getAllFriendsPosts:userId",
-  isRequestParamsProvided("userId"),
-  checkQueryParamsCorrect(["page,pageSize"])
+  "/getAllFriendsPosts",
+
+  checkQueryParamsCorrect(["page", "pageSize"]),
+  controller.getAllFriendsPosts
 );
 router.get(
   "/getUserPosts:userId",
   isRequestParamsProvided("userId"),
-  checkQueryParamsCorrect(["page,pageSize"])
+  checkQueryParamsCorrect(["page", "pageSize"])
 );
 
 export default router;

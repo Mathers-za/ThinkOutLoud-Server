@@ -1,12 +1,12 @@
 import { Schema } from "mongoose";
 import Posts from "../models/Posts";
-import { skip } from "node:test";
 
 export const getAllUsersPosts = async (
   userOrUsersIds: string[] | Schema.Types.ObjectId[],
   page: number = 1,
   pageSize: number = 10
 ) => {
+  console.log("made it into the getallusersposts helper fucntion");
   const offset = (page - 1) * pageSize;
   let postsArray = await Posts.aggregate([
     { $match: { creatorId: { $in: userOrUsersIds } } },
